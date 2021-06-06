@@ -432,10 +432,10 @@ mod tests {
         assert_type_eq_all!(I64TypePos, I64TypeNeg);
 
         #[cfg(target_pointer_width = "128")]
-        type I128TypePos = small_unsigned!(9_300_000_000_000_000_000);
+        type I128TypePos = small_signed!(9_300_000_000_000_000_000);
 
         #[cfg(target_pointer_width = "128")]
-        type I128TypeNeg = small_unsigned!(-9_300_000_000_000_000_000);
+        type I128TypeNeg = small_signed!(-9_300_000_000_000_000_000);
 
         #[cfg(target_pointer_width = "128")]
         assert_type_eq_all!(I128TypePos, I128TypeNeg);
