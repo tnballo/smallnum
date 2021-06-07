@@ -4,7 +4,7 @@
 ![GitHub Actions](https://github.com/tnballo/smallnum/workflows/test/badge.svg)
 
 Integer optimization: macros return the smallest integer type capable of fitting a static bounds.
-Both signed (e.g. macro input is maximum) and unsigned (e.g. macro input is maximum or minimum) numbers supported.
+Both unsigned (e.g. macro input is maximum) and signed (e.g. macro input is maximum or minimum) numbers supported.
 Saves memory on embedded devices.
 `!#[no_std]`, `#![forbid(unsafe_code)]`, zero-cost.
 

@@ -1,11 +1,11 @@
-// Crate Attributes ----------------------------------------------------------------------------------------------------
-
 #![no_std]
 #![forbid(unsafe_code)]
 #![deny(missing_docs)]
 
+// TODO: add f32 and f64 support
+
 //! Integer optimization: macros return the smallest integer type capable of fitting a static bounds.
-//! Both signed (e.g. macro input is maximum) and unsigned (e.g. macro input is maximum or minimum) numbers supported.
+//! Both unsigned (e.g. macro input is maximum) and signed (e.g. macro input is maximum or minimum) numbers supported.
 //! Saves memory on embedded devices.
 //! `!#[no_std]`, `#![forbid(unsafe_code)]`, zero-cost.
 //!
@@ -71,7 +71,7 @@
 
 // Unsigned Normalization ----------------------------------------------------------------------------------------------
 
-/// Helper trait for unsigned normalization (e.g. `usize`)
+/// Convenience trait for unsigned normalization (e.g. `usize`)
 pub trait SmallUnsigned {
     /// Get value of small unsigned as host register-width unsigned (e.g. `usize`)
     fn usize(&self) -> usize;
@@ -122,7 +122,7 @@ impl SmallUnsigned for u128 {
 
 // Signed Normalization ------------------------------------------------------------------------------------------------
 
-/// Helper trait for signed normalization (e.g. `isize`)
+/// Convenience trait for signed normalization (e.g. `isize`)
 pub trait SmallSigned {
     /// Get value of small signed as host register-width signed (e.g. `isize`)
     fn isize(&self) -> isize;
