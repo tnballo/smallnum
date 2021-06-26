@@ -1,6 +1,6 @@
 [package]
 name = "smallnum"
-version = "0.1.0"
+version = "0.2.0"
 authors = ["Tiemoko Ballo"]
 edition = "2018"
 license = "MIT"
@@ -9,8 +9,8 @@ homepage = "https://github.com/tnballo/smallnum"
 repository = "https://github.com/tnballo/smallnum"
 documentation = "https://docs.rs/smallnum"
 keywords = ["small", "num", "integer", "macro", "no_std"]
-categories = ["embedded", "no-std", "rust-patterns", "config", "memory-management"]
-description = "Integer optimization: macros return the smallest integer type capable of fitting a static bounds."
+categories = ["embedded", "no-std", "rust-patterns", "config"]
+description = "Compile-time size optimization for numeric primitives."
 include = [
     "**/*.rs",
     "**/*.md",
