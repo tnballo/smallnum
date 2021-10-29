@@ -12,6 +12,11 @@ For signed integers, macro input may be a maximum or a minimum.
 * Embedded-friendly: `!#[no_std]`.
 * Safe: `#![forbid(unsafe_code)]`.
 
+### What is this for?
+
+Aiding the compiler in memory layout optimization (aka ["struct packing"](http://www.catb.org/esr/structure-packing/)).
+For an example usecase where `smallnum` cuts RAM usage by 50%, please see [this part](https://github.com/tnballo/scapegoat#the-high_assurance-feature) of the `scapegoat` crate's documentation.
+
 ### Example: Collection Index
 
 When the size of a collection is known at compile-time, the variable used to index it can be size-optimized.
@@ -38,6 +43,9 @@ assert_eq!(my_array[idx], my_array[small_idx.usize()]);
 #[cfg(target_pointer_width = "64")]
 assert_eq!(size_of_val(&idx) - size_of_val(&small_idx), 6);
 ```
+
+Notice that having the trait `SmallUnsigned` in scope allows `small_idx.usize()` to be called.
+This function returns a `usize` for convenient indexing, regardless of which type the macro selected (`u16` in the above example, hence the 6 byte savings over a 64-bit host's `u64`).
 
 ### Example: Tree Node Metadata
 
