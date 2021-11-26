@@ -1,7 +1,9 @@
 # smallnum
 
-![crates.io](https://img.shields.io/crates/v/smallnum.svg)
-![GitHub Actions](https://github.com/tnballo/smallnum/workflows/test/badge.svg)
+[![crates.io](https://img.shields.io/crates/v/smallnum.svg)](https://crates.io/crates/smallnum)
+[![docs.rs](https://docs.rs/smallnum/badge.svg)](https://docs.rs/smallnum/)
+[![GitHub Actions](https://github.com/tnballo/smallnum/workflows/test/badge.svg)](https://github.com/tnballo/smallnum/actions)
+[![License: MIT](https://img.shields.io/badge/License-MIT-brightgreen.svg)](https://github.com/tnballo/smallnum/blob/master/LICENSE)
 
 Compile-time size optimization for numeric primitives.
 Macros return smallest numeric type capable of fitting a static bounds.
@@ -125,7 +127,16 @@ pub struct SmallEdgeData {
 assert_eq!(size_of::<EdgeData>() - size_of::<SmallEdgeData>(), 18);
 ```
 
+### Advanced Examples
+
+See [`examples/`](https://github.com/tnballo/smallnum/tree/master/examples) directory, `cargo run --example <file_name>`.
+
 ### Macro <-> Type Selection Set
 
 * [`small_unsigned!`](crate::small_unsigned) <-> (`u8`, `u16`, `u32`, `u64`, `u128`)
 * [`small_signed!`](crate::small_signed) <-> (`i8`, `i16`, `i32`, `i64`, `i128`)
+
+### License and Contributing
+
+Licensed under the [MIT license](https://github.com/tnballo/smallnum/blob/master/LICENSE).
+Contributions are welcome!

@@ -126,10 +126,19 @@ pub struct SmallEdgeData {
 assert_eq!(size_of::<EdgeData>() - size_of::<SmallEdgeData>(), 18);
 ```
 
+### Advanced Examples
+
+See [`examples/`](https://github.com/tnballo/smallnum/tree/master/examples) directory, `cargo run --example <file_name>`.
+
 ### Macro <-> Type Selection Set
 
 * [`small_unsigned!`](crate::small_unsigned) <-> (`u8`, `u16`, `u32`, `u64`, `u128`)
 * [`small_signed!`](crate::small_signed) <-> (`i8`, `i16`, `i32`, `i64`, `i128`)
+
+### License and Contributing
+
+Licensed under the [MIT license](https://github.com/tnballo/smallnum/blob/master/LICENSE).
+Contributions are welcome!
 */
 
 mod unsigned;

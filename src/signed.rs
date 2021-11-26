@@ -78,11 +78,26 @@ impl SmallSigned for i128 {
 macro_rules! small_signed {
     ( $val:expr $(,)? ) => {
         <() as $crate::ShrinkSigned<
-            { (core::i8::MIN as i128 <= ($val as i128)) && (($val as i128) <= (core::i8::MAX as i128)) },
-            { (core::i16::MIN as i128 <= ($val as i128)) && (($val as i128) <= (core::i16::MAX as i128)) },
-            { (core::i32::MIN as i128 <= ($val as i128)) && (($val as i128) <= (core::i32::MAX as i128)) },
-            { (core::i64::MIN as i128 <= ($val as i128)) && (($val as i128) <= (core::i64::MAX as i128)) },
-            { (core::i128::MIN as i128 <= ($val as i128)) && (($val as i128) <= (core::i128::MAX as i128)) },
+            {
+                (core::i8::MIN as i128 <= ($val as i128))
+                    && (($val as i128) <= (core::i8::MAX as i128))
+            },
+            {
+                (core::i16::MIN as i128 <= ($val as i128))
+                    && (($val as i128) <= (core::i16::MAX as i128))
+            },
+            {
+                (core::i32::MIN as i128 <= ($val as i128))
+                    && (($val as i128) <= (core::i32::MAX as i128))
+            },
+            {
+                (core::i64::MIN as i128 <= ($val as i128))
+                    && (($val as i128) <= (core::i64::MAX as i128))
+            },
+            {
+                (core::i128::MIN as i128 <= ($val as i128))
+                    && (($val as i128) <= (core::i128::MAX as i128))
+            },
         >>::SmallSigned
     };
 }
