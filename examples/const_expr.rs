@@ -2,31 +2,20 @@
 
 use smallnum::small_unsigned;
 
-/*
-trait ArenaIdxArr {
-    type Idx;
-}
-
-impl <T, const N: usize> ArenaIndexArr {
-
-}
-*/
-
-#[derive(Clone, Debug)]
-pub struct Arena<T, const N: usize> {
+pub struct Arena<T: Default + Copy, const N: usize> {
     storage: [T; N],
     free_list: [small_unsigned!(N); N],
 }
 
-impl<T, const N: usize> Arena<T, N> {
-    const fn new() -> Self {
+impl<T: Default + Copy, const N: usize> Arena<T, N> {
+    fn new() -> Self {
         Self {
-            storage: [T; N],
-            free_list: [T; N],
+            storage: [T::default(); N],
+            free_list: [0; N],
         }
     }
 }
 
 fn main() {
-    let arena = Arena::new();
+    let arena = Arena::<usize, 10>::new();
 }

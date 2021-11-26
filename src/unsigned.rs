@@ -72,47 +72,11 @@ impl SmallUnsigned for u128 {
 macro_rules! small_unsigned {
     ( $max:expr $(,)? ) => {
         <() as $crate::ShrinkUnsigned<
-            { $max <= (core::u8::MAX as usize) },
-            {
-                if cfg!(any(
-                    target_pointer_width = "16",
-                    target_pointer_width = "32",
-                    target_pointer_width = "64",
-                    target_pointer_width = "128"
-                )) {
-                    $max <= (core::u16::MAX as usize)
-                } else {
-                    true
-                }
-            },
-            {
-                if cfg!(any(
-                    target_pointer_width = "32",
-                    target_pointer_width = "64",
-                    target_pointer_width = "128"
-                )) {
-                    $max <= (core::u32::MAX as usize)
-                } else {
-                    true
-                }
-            },
-            {
-                if cfg!(any(
-                    target_pointer_width = "64",
-                    target_pointer_width = "128"
-                )) {
-                    $max <= (core::u64::MAX as usize)
-                } else {
-                    true
-                }
-            },
-            {
-                if cfg!(target_pointer_width = "128") {
-                    $max <= (core::u128::MAX as usize)
-                } else {
-                    true
-                }
-            },
+            { ($max as u128) <= (core::u8::MAX as u128) },
+            { ($max as u128) <= (core::u16::MAX as u128) },
+            { ($max as u128) <= (core::u32::MAX as u128) },
+            { ($max as u128) <= (core::u64::MAX as u128) },
+            { ($max as u128) <= (core::u128::MAX as u128) },
         >>::UnsignedType
     };
 }

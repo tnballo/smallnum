@@ -78,47 +78,11 @@ impl SmallSigned for i128 {
 macro_rules! small_signed {
     ( $val:expr $(,)? ) => {
         <() as $crate::ShrinkSigned<
-            { (core::i8::MIN as isize <= $val) && ($val <= (core::i8::MAX as isize)) },
-            {
-                if cfg!(any(
-                    target_pointer_width = "16",
-                    target_pointer_width = "32",
-                    target_pointer_width = "64",
-                    target_pointer_width = "128"
-                )) {
-                    (core::i16::MIN as isize <= $val) && ($val <= (core::i16::MAX as isize))
-                } else {
-                    true
-                }
-            },
-            {
-                if cfg!(any(
-                    target_pointer_width = "32",
-                    target_pointer_width = "64",
-                    target_pointer_width = "128"
-                )) {
-                    (core::i32::MIN as isize <= $val) && ($val <= (core::i32::MAX as isize))
-                } else {
-                    true
-                }
-            },
-            {
-                if cfg!(any(
-                    target_pointer_width = "64",
-                    target_pointer_width = "128"
-                )) {
-                    (core::i64::MIN as isize <= $val) && ($val <= (core::i64::MAX as isize))
-                } else {
-                    true
-                }
-            },
-            {
-                if cfg!(target_pointer_width = "128") {
-                    (core::i128::MIN as isize <= $val) && ($val <= (core::i128::MAX as isize))
-                } else {
-                    true
-                }
-            },
+            { (core::i8::MIN as i128 <= ($val as i128)) && (($val as i128) <= (core::i8::MAX as i128)) },
+            { (core::i16::MIN as i128 <= ($val as i128)) && (($val as i128) <= (core::i16::MAX as i128)) },
+            { (core::i32::MIN as i128 <= ($val as i128)) && (($val as i128) <= (core::i32::MAX as i128)) },
+            { (core::i64::MIN as i128 <= ($val as i128)) && (($val as i128) <= (core::i64::MAX as i128)) },
+            { (core::i128::MIN as i128 <= ($val as i128)) && (($val as i128) <= (core::i128::MAX as i128)) },
         >>::SmallSigned
     };
 }
