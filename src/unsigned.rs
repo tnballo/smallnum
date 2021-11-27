@@ -3,15 +3,26 @@
 // TODO: make this const once stabilized: https://github.com/rust-lang/rust/issues/67792
 // Then update $val -> $val.usize() so that macros can take any int type as input
 
-/// Convenience trait for unsigned normalization (e.g. `usize`).
+/// Convenience trait for unsigned normalization (e.g. to/from `usize`).
 pub trait SmallUnsigned {
     /// Get value of small unsigned as host register-width unsigned (e.g. `usize`)
     fn usize(&self) -> usize;
+
+    /// Convert input `usize` into a primitive implementing the `SmallUnsigned` trait.
+    /// Panics if `usize` exceeds max for returned unsigned primitive.
+    /// `core::convert::From` not used b/c `SmallUnsigned` is not generic by design,
+    /// implemented only for (`u8`, `u16`, `u32`, `u64`, `u128`) and only up to host integer width.
+    fn checked_from(num: usize) -> Self;
 }
 
 impl SmallUnsigned for u8 {
     fn usize(&self) -> usize {
         *self as usize
+    }
+
+    fn checked_from(num: usize) -> u8 {
+        assert!(num <= u8::MAX as usize);
+        num as u8
     }
 }
 
@@ -25,6 +36,11 @@ impl SmallUnsigned for u16 {
     fn usize(&self) -> usize {
         *self as usize
     }
+
+    fn checked_from(num: usize) -> u16 {
+        assert!(num <= u16::MAX as usize);
+        num as u16
+    }
 }
 
 #[cfg(any(
@@ -36,6 +52,11 @@ impl SmallUnsigned for u32 {
     fn usize(&self) -> usize {
         *self as usize
     }
+
+    fn checked_from(num: usize) -> u32 {
+        assert!(num <= u32::MAX as usize);
+        num as u32
+    }
 }
 
 #[cfg(any(target_pointer_width = "64", target_pointer_width = "128",))]
@@ -43,12 +64,22 @@ impl SmallUnsigned for u64 {
     fn usize(&self) -> usize {
         *self as usize
     }
+
+    fn checked_from(num: usize) -> u64 {
+        assert!(num <= u64::MAX as usize);
+        num as u64
+    }
 }
 
 #[cfg(target_pointer_width = "128")]
 impl SmallUnsigned for u128 {
     fn usize(&self) -> usize {
         *self as usize
+    }
+
+    fn checked_from(num: usize) -> u128 {
+        assert!(num <= u128::MAX as usize);
+        num as u128
     }
 }
 
@@ -152,7 +183,7 @@ mod tests {
         #[cfg(target_pointer_width = "128")]
         assert_eq!(size_of::<U128Type>(), 16);
 
-        // Normalization Check -----------------------------------------------------------------------------------------
+        // Normalization Check (to usize) ------------------------------------------------------------------------------
 
         let u8_num: U8Type = 200;
         let u16_num: U16Type = 500;
@@ -173,5 +204,22 @@ mod tests {
 
         #[cfg(target_pointer_width = "128")]
         assert_eq!(u128_num.usize(), 18_500_000_000_000_000_000 as usize);
+
+        // Normalization Check (from usize) ----------------------------------------------------------------------------
+
+        assert_eq!(200 as u8, u8::checked_from(200 as usize));
+        assert_eq!(500 as u16, u16::checked_from(500 as usize));
+
+        #[cfg(any(target_pointer_width = "64", target_pointer_width = "128"))]
+        assert_eq!(
+            4_300_000_000 as u64,
+            u64::checked_from(4_300_000_000 as usize)
+        );
+
+        #[cfg(target_pointer_width = "128")]
+        assert_eq!(
+            18_500_000_000_000_000_000 as u128,
+            u128::checked_from(18_500_000_000_000_000_000 as usize)
+        );
     }
 }

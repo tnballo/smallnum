@@ -1,6 +1,6 @@
 [package]
 name = "smallnum"
-version = "0.2.2"
+version = "0.3.0"
 authors = ["Tiemoko Ballo"]
 edition = "2018"
 license = "MIT"
@@ -12,7 +12,7 @@ keywords = ["small", "num", "integer", "macro", "no_std"]
 categories = ["embedded", "no-std", "rust-patterns", "config"]
 description = "Compile-time size optimization for numeric primitives."
 include = [
-    "**/*.rs",
+    "src/**/*.rs",
     "**/*.md",
     "**/*.sh",
     "Cargo.toml",

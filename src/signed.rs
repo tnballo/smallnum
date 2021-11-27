@@ -3,15 +3,26 @@
 // TODO: make this const once stabilized: https://github.com/rust-lang/rust/issues/67792
 // Then update $val -> $val.isize() so that macros can take any int type as input
 
-/// Convenience trait for signed normalization (e.g. `isize`).
+/// Convenience trait for signed normalization (e.g. to/from `isize`).
 pub trait SmallSigned {
     /// Get value of small signed as host register-width signed (e.g. `isize`)
     fn isize(&self) -> isize;
+
+    /// Convert input `isize` into a primitive implementing the `SmallSigned` trait.
+    /// Panics if `isize` exceeds min/max for returned signed primitive.
+    /// `core::convert::From` not used b/c `SmallSigned` is not generic by design,
+    /// implemented only for (`i8`, `i16`, `i32`, `i64`, `i128`) and only up to host integer width.
+    fn checked_from(num: isize) -> Self;
 }
 
 impl SmallSigned for i8 {
     fn isize(&self) -> isize {
         *self as isize
+    }
+
+    fn checked_from(num: isize) -> Self {
+        assert!((i8::MIN as isize <= num) && (num <= i8::MAX as isize));
+        num as i8
     }
 }
 
@@ -25,6 +36,11 @@ impl SmallSigned for i16 {
     fn isize(&self) -> isize {
         *self as isize
     }
+
+    fn checked_from(num: isize) -> Self {
+        assert!((i16::MIN as isize <= num) && (num <= i16::MAX as isize));
+        num as i16
+    }
 }
 
 #[cfg(any(
@@ -36,6 +52,11 @@ impl SmallSigned for i32 {
     fn isize(&self) -> isize {
         *self as isize
     }
+
+    fn checked_from(num: isize) -> Self {
+        assert!((i32::MIN as isize <= num) && (num <= i32::MAX as isize));
+        num as i32
+    }
 }
 
 #[cfg(any(target_pointer_width = "64", target_pointer_width = "128",))]
@@ -43,12 +64,22 @@ impl SmallSigned for i64 {
     fn isize(&self) -> isize {
         *self as isize
     }
+
+    fn checked_from(num: isize) -> Self {
+        assert!((i64::MIN as isize <= num) && (num <= i64::MAX as isize));
+        num as i64
+    }
 }
 
 #[cfg(target_pointer_width = "128")]
 impl SmallSigned for i128 {
     fn isize(&self) -> isize {
         *self as isize
+    }
+
+    fn checked_from(num: isize) -> Self {
+        assert!((i128::MIN as isize <= num) && (num <= i128::MAX as isize));
+        num as i28
     }
 }
 
@@ -208,7 +239,7 @@ mod tests {
         #[cfg(target_pointer_width = "128")]
         assert_eq!(size_of::<I128TypePos>(), size_of()::<128TypeNeg>());
 
-        // Normalization Check -----------------------------------------------------------------------------------------
+        // Normalization Check (to isize) ------------------------------------------------------------------------------
 
         let i8_num_pos: I8TypePos = 100;
         let i16_num_pos: I16TypePos = 500;
@@ -249,5 +280,40 @@ mod tests {
 
         #[cfg(target_pointer_width = "128")]
         assert_eq!(i128_num_neg.isize(), -9_300_000_000_000_000_000 as isize);
+
+        // Normalization Check (From isize) ----------------------------------------------------------------------------
+
+        assert_eq!(100 as i8, i8::checked_from(100 as isize));
+        assert_eq!(-100 as i8, i8::checked_from(-100 as isize));
+
+        assert_eq!(500 as i16, i16::checked_from(500 as isize));
+        assert_eq!(-500 as i16, i16::checked_from(-500 as isize));
+
+        assert_eq!(50_00 as i16, i16::checked_from(50_00 as isize));
+        assert_eq!(-50_00 as i16, i16::checked_from(-50_00 as isize));
+
+        #[cfg(any(target_pointer_width = "64", target_pointer_width = "128"))]
+        {
+            assert_eq!(
+                2_200_000_000 as i64,
+                i64::checked_from(2_200_000_000 as isize)
+            );
+            assert_eq!(
+                -2_200_000_000 as i64,
+                i64::checked_from(-2_200_000_000 as isize)
+            );
+        }
+
+        #[cfg(target_pointer_width = "128")]
+        {
+            assert_eq!(
+                9_300_000_000_000_000_000 as i128,
+                i128::checked_from(9_300_000_000_000_000_000 as isize)
+            );
+            assert_eq!(
+                -9_300_000_000_000_000_000 as i128,
+                i128::checked_from(-9_300_000_000_000_000_000 as isize)
+            );
+        }
     }
 }
