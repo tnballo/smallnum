@@ -15,6 +15,16 @@ pub trait SmallUnsigned {
     fn checked_from(num: usize) -> Self;
 }
 
+impl SmallUnsigned for usize {
+    fn usize(&self) -> usize {
+        *self
+    }
+
+    fn checked_from(num: usize) -> usize {
+        num
+    }
+}
+
 impl SmallUnsigned for u8 {
     fn usize(&self) -> usize {
         *self as usize

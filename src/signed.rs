@@ -15,6 +15,16 @@ pub trait SmallSigned {
     fn checked_from(num: isize) -> Self;
 }
 
+impl SmallSigned for isize {
+    fn isize(&self) -> isize {
+        *self
+    }
+
+    fn checked_from(num: isize) -> isize {
+        num
+    }
+}
+
 impl SmallSigned for i8 {
     fn isize(&self) -> isize {
         *self as isize
