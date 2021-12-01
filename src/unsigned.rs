@@ -1,3 +1,46 @@
+// Unsigned Labeling ---------------------------------------------------------------------------------------------------
+
+/// Labels for unsigned integer primitives.
+#[derive(Debug, PartialEq, Eq, Ord, PartialOrd, Copy, Clone)]
+pub enum SmallUnsignedLabel {
+    /// A label for `usize` types.
+    USIZE,
+
+    /// A label for `u8` types.
+    U8,
+
+    /// A label for `u16` types.
+    U16,
+
+    /// A label for `u32` types.
+    U32,
+
+    /// A label for `u64` types.
+    U64,
+
+    /// A label for `u128` types.
+    U128,
+}
+
+impl SmallUnsignedLabel {
+    /// Maps input `usize` to label for smallest integer primitive capable of representing it
+    /// (e.g. `new(100)` -> `SmallUnsignedLabel::U8`).
+    pub const fn new(num: usize) -> Self {
+        if (num as u128) <= (core::u8::MAX as u128) {
+            SmallUnsignedLabel::U8
+        } else if (num as u128) <= (core::u16::MAX as u128) {
+            SmallUnsignedLabel::U16
+        } else if (num as u128) <= (core::u32::MAX as u128) {
+            SmallUnsignedLabel::U32
+        } else if (num as u128) <= (core::u64::MAX as u128) {
+            SmallUnsignedLabel::U64
+        } else {
+            // (num as u128) <= (core::u128::MAX as u128)
+            SmallUnsignedLabel::U128
+        }
+    }
+}
+
 // Unsigned Normalization ----------------------------------------------------------------------------------------------
 
 // TODO: make this const once stabilized: https://github.com/rust-lang/rust/issues/67792
@@ -93,7 +136,7 @@ impl SmallUnsigned for u128 {
     }
 }
 
-// Compile-time Bound Mapping ------------------------------------------------------------------------------------------
+// Compile-time Type Mapping -------------------------------------------------------------------------------------------
 
 /// Return smallest unsigned type capable of representing input value (positive, i.e. maximum)
 ///
@@ -155,12 +198,35 @@ impl ShrinkUnsigned<false, false, false, false, true> for () {
     type UnsignedType = u128;
 }
 
+// Compile-time Label Mapping ------------------------------------------------------------------------------------------
+
+/// Return a label (`enum` discriminant), corresponding to the smallest type capable of representing input value
+/// (positive, i.e. maximum).
+///
+/// # Example
+///
+/// ```
+/// use smallnum::{small_unsigned_label, SmallUnsignedLabel};
+///
+/// let u8_label = small_unsigned_label!(100);
+/// assert_eq!(u8_label, SmallUnsignedLabel::U8);
+///
+/// let u16_label = small_unsigned_label!(500);
+/// assert_eq!(u16_label, SmallUnsignedLabel::U16);
+/// ```
+#[macro_export]
+macro_rules! small_unsigned_label {
+    ( $max:expr $(,)? ) => {
+        SmallUnsignedLabel::new($max)
+    };
+}
+
 // Test ----------------------------------------------------------------------------------------------------------------
 
 #[cfg(test)]
 mod tests {
 
-    use crate::SmallUnsigned;
+    use crate::{SmallUnsigned, SmallUnsignedLabel};
     use core::mem::size_of;
 
     const MAX_VAL_UNSIGNED: usize = 512;
@@ -231,5 +297,34 @@ mod tests {
             18_500_000_000_000_000_000 as u128,
             u128::checked_from(18_500_000_000_000_000_000 as usize)
         );
+    }
+
+    #[test]
+    fn unsigned_label_macro() {
+        // Label mapping -----------------------------------------------------------------------------------------------
+
+        let max_label = small_unsigned_label!(MAX_VAL_UNSIGNED);
+        let u8_label = small_unsigned_label!(200);
+        let u16_label = small_unsigned_label!(500);
+        let u32_label = small_unsigned_label!(100_000);
+
+        #[cfg(any(target_pointer_width = "64", target_pointer_width = "128"))]
+        let u64_label = small_unsigned_label!(4_300_000_000);
+
+        #[cfg(target_pointer_width = "128")]
+        let u128_label = small_unsigned_label!(18_500_000_000_000_000_000);
+
+        // Label Check ---------------------------------------------------------------------------------------------------
+
+        assert_eq!(max_label, SmallUnsignedLabel::U16);
+        assert_eq!(u8_label, SmallUnsignedLabel::U8);
+        assert_eq!(u16_label, SmallUnsignedLabel::U16);
+        assert_eq!(u32_label, SmallUnsignedLabel::U32);
+
+        #[cfg(any(target_pointer_width = "64", target_pointer_width = "128"))]
+        assert_eq!(u64_label, SmallUnsignedLabel::U64);
+
+        #[cfg(target_pointer_width = "128")]
+        assert_eq!(u128_label, SmallUnsignedLabel::U128);
     }
 }

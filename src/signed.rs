@@ -93,7 +93,7 @@ impl SmallSigned for i128 {
     }
 }
 
-// Compile-time Bound Mapping ------------------------------------------------------------------------------------------
+// Compile-time Type Mapping -------------------------------------------------------------------------------------------
 
 /// Return smallest signed type capable of representing input value (positive, i.e. maximum, or negative, i.e. minimum)
 ///
