@@ -145,4 +145,4 @@ mod unsigned;
 pub use crate::unsigned::{ShrinkUnsigned, SmallUnsigned, SmallUnsignedLabel};
 
 mod signed;
-pub use crate::signed::{ShrinkSigned, SmallSigned};
+pub use crate::signed::{ShrinkSigned, SmallSigned, SmallSignedLabel};

@@ -1,3 +1,53 @@
+// Signed Labeling -----------------------------------------------------------------------------------------------------
+
+/// Labels for signed integer primitives.
+#[derive(Debug, PartialEq, Eq, Ord, PartialOrd, Copy, Clone)]
+pub enum SmallSignedLabel {
+    /// A label for `isize` types.
+    ISIZE,
+
+    /// A label for `i8` types.
+    I8,
+
+    /// A label for `i16` types.
+    I16,
+
+    /// A label for `i32` types.
+    I32,
+
+    /// A label for `i64` types.
+    I64,
+
+    /// A label for `i128` types.
+    I128,
+}
+
+// TODO: return ISIZE based on host width?
+impl SmallSignedLabel {
+    /// Maps input `isize` to label for smallest integer primitive capable of representing it
+    /// (e.g. `new(-100)` -> `SmallSignedLabel::I8`).
+    pub const fn new(num: isize) -> Self {
+        if (core::i8::MIN as i128 <= (num as i128)) && ((num as i128) <= (core::i8::MAX as i128)) {
+            SmallSignedLabel::I8
+        } else if (core::i16::MIN as i128 <= (num as i128))
+            && ((num as i128) <= (core::i16::MAX as i128))
+        {
+            SmallSignedLabel::I16
+        } else if (core::i32::MIN as i128 <= (num as i128))
+            && ((num as i128) <= (core::i32::MAX as i128))
+        {
+            SmallSignedLabel::I32
+        } else if (core::i64::MIN as i128 <= (num as i128))
+            && ((num as i128) <= (core::i64::MAX as i128))
+        {
+            SmallSignedLabel::I64
+        } else {
+            // (core::i128::MIN as i128 <= (num as i128)) && ((num as i128) <= (core::i128::MAX as i128))
+            SmallSignedLabel::I128
+        }
+    }
+}
+
 // Signed Normalization ------------------------------------------------------------------------------------------------
 
 // TODO: make this const once stabilized: https://github.com/rust-lang/rust/issues/67792
@@ -95,7 +145,7 @@ impl SmallSigned for i128 {
 
 // Compile-time Type Mapping -------------------------------------------------------------------------------------------
 
-/// Return smallest signed type capable of representing input value (positive, i.e. maximum, or negative, i.e. minimum)
+/// Return smallest signed type capable of representing input value (positive, i.e. maximum, or negative, i.e. minimum).
 ///
 /// # Example
 ///
@@ -176,12 +226,35 @@ impl ShrinkSigned<false, false, false, false, true> for () {
     type SmallSigned = i128;
 }
 
+// Compile-time Label Mapping ------------------------------------------------------------------------------------------
+
+/// Return a label (`enum` discriminant), corresponding to the smallest type capable of representing input value
+/// (positive, i.e. maximum, or negative, i.e. minimum).
+///
+/// # Example
+///
+/// ```
+/// use smallnum::{small_signed_label, SmallSignedLabel};
+///
+/// let i8_label = small_signed_label!(100);
+/// assert_eq!(i8_label, SmallSignedLabel::I8);
+///
+/// let i16_label = small_signed_label!(-500);
+/// assert_eq!(i16_label, SmallSignedLabel::I16);
+/// ```
+#[macro_export]
+macro_rules! small_signed_label {
+    ( $max:expr $(,)? ) => {
+        SmallSignedLabel::new($max)
+    };
+}
+
 // Test ----------------------------------------------------------------------------------------------------------------
 
 #[cfg(test)]
 mod tests {
 
-    use crate::SmallSigned;
+    use crate::{SmallSigned, SmallSignedLabel};
     use core::mem::size_of;
     use static_assertions::assert_type_eq_all;
 
@@ -325,5 +398,56 @@ mod tests {
                 i128::checked_from(-9_300_000_000_000_000_000 as isize)
             );
         }
+    }
+
+    #[test]
+    fn signed_label_macro() {
+        // Label mapping -----------------------------------------------------------------------------------------------
+
+        let max_label = small_signed_label!(MAX_VAL_SIGNED);
+        let i8_label_pos = small_signed_label!(100);
+        let i16_label_pos = small_signed_label!(500);
+        let i32_label_pos = small_signed_label!(50_000);
+
+        #[cfg(any(target_pointer_width = "64", target_pointer_width = "128"))]
+        let i64_label_pos = small_signed_label!(2_200_000_000);
+
+        #[cfg(target_pointer_width = "128")]
+        let i128_label_pos = small_signed_label!(9_300_000_000_000_000_000);
+
+        let min_label = small_signed_label!(MIN_VAL_SIGNED);
+        let i8_label_neg = small_signed_label!(-100);
+        let i16_label_neg = small_signed_label!(-500);
+        let i32_label_neg = small_signed_label!(-50_000);
+
+        #[cfg(any(target_pointer_width = "64", target_pointer_width = "128"))]
+        let i64_label_neg = small_signed_label!(-2_200_000_000);
+
+        #[cfg(target_pointer_width = "128")]
+        let i128_label_neg = small_signed_label!(-9_300_000_000_000_000_000);
+
+        // Label Check ---------------------------------------------------------------------------------------------------
+
+        assert_eq!(max_label, SmallSignedLabel::I16);
+        assert_eq!(i8_label_pos, SmallSignedLabel::I8);
+        assert_eq!(i16_label_pos, SmallSignedLabel::I16);
+        assert_eq!(i32_label_pos, SmallSignedLabel::I32);
+
+        #[cfg(any(target_pointer_width = "64", target_pointer_width = "128"))]
+        assert_eq!(i64_label_pos, SmallSignedLabel::I64);
+
+        #[cfg(target_pointer_width = "128")]
+        assert_eq!(i128_label_pos, SmallSignedLabel::I128);
+
+        assert_eq!(min_label, SmallSignedLabel::I16);
+        assert_eq!(i8_label_neg, SmallSignedLabel::I8);
+        assert_eq!(i16_label_neg, SmallSignedLabel::I16);
+        assert_eq!(i32_label_neg, SmallSignedLabel::I32);
+
+        #[cfg(any(target_pointer_width = "64", target_pointer_width = "128"))]
+        assert_eq!(i64_label_neg, SmallSignedLabel::I64);
+
+        #[cfg(target_pointer_width = "128")]
+        assert_eq!(i128_label_neg, SmallSignedLabel::I128);
     }
 }

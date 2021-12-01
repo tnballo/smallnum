@@ -22,6 +22,7 @@ pub enum SmallUnsignedLabel {
     U128,
 }
 
+// TODO: return USIZE based on host width?
 impl SmallUnsignedLabel {
     /// Maps input `usize` to label for smallest integer primitive capable of representing it
     /// (e.g. `new(100)` -> `SmallUnsignedLabel::U8`).
@@ -138,7 +139,7 @@ impl SmallUnsigned for u128 {
 
 // Compile-time Type Mapping -------------------------------------------------------------------------------------------
 
-/// Return smallest unsigned type capable of representing input value (positive, i.e. maximum)
+/// Return smallest unsigned type capable of representing input value (positive, i.e. maximum).
 ///
 /// # Example
 ///
