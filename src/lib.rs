@@ -18,6 +18,19 @@ For signed integers, macro input may be a maximum or a minimum.
 Aiding the compiler in memory layout optimization (aka ["struct packing"](http://www.catb.org/esr/structure-packing/)).
 For an example usecase where `smallnum` cuts RAM usage by 50%, please see [this part](https://github.com/tnballo/scapegoat#the-high_assurance-feature) of the `scapegoat` crate's documentation.
 
+### Doesn't `#[repr(packed)]` already do that?
+
+Not safely. The difference is subtle but important:
+
+* `#[repr(packed)]` removes all padding between struct fields.
+This incurs a performance penalty for misaligned accesses at best, and [causes undefined behavior](https://doc.rust-lang.org/nomicon/other-reprs.html#reprpacked) at worst.
+It's something you generally want to avoid.
+
+* `smallnum` aids packing while maintaining the target's native alignment, without removing padding.
+It can actually improve [data cache] performance while being fully safe.
+
+For extreme size optimization, you're free to combine `smallnum` with `#[repr(packed)]`.
+
 ### Example: Collection Index
 
 When the size of a collection is known at compile-time, the variable used to index it can be size-optimized.
