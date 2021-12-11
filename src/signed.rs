@@ -26,6 +26,7 @@ pub enum SmallSignedLabel {
 impl SmallSignedLabel {
     /// Maps input `isize` to label for smallest integer primitive capable of representing it
     /// (e.g. `new(-100)` -> `SmallSignedLabel::I8`).
+    /// At present, this function does not return the `ISIZE` variant (never needed?).
     pub const fn new(num: isize) -> Self {
         if (core::i8::MIN as i128 <= (num as i128)) && ((num as i128) <= (core::i8::MAX as i128)) {
             SmallSignedLabel::I8
@@ -55,13 +56,18 @@ impl SmallSignedLabel {
 
 /// Convenience trait for signed normalization (e.g. to/from `isize`).
 pub trait SmallSigned {
-    /// Get value of small signed as host register-width signed (e.g. `isize`)
+    /// **Upcast:** Get value of small signed as host register-width signed (e.g. `isize`)
     fn isize(&self) -> isize;
 
-    /// Convert input `isize` into a primitive implementing the `SmallSigned` trait.
+    /// **Downcast:** Convert input `isize` into a primitive implementing the `SmallSigned` trait.
     /// Panics if `isize` exceeds min/max for returned signed primitive.
     /// `core::convert::From` not used b/c `SmallSigned` is not generic by design,
     /// implemented only for (`i8`, `i16`, `i32`, `i64`, `i128`) and only up to host integer width.
+    ///
+    /// ### Note
+    ///
+    /// Unlike others, this API has a tiny (1 comparison/branch) runtime cost.
+    /// The `check` in `checked_from` is an `assert` to prevent loss of precision.
     fn checked_from(num: isize) -> Self;
 }
 
@@ -193,6 +199,7 @@ macro_rules! small_signed {
     };
 }
 
+#[doc(hidden)] // API user should never have to be aware this exists.
 /// Helper trait for signed type mapping. Internal use only.
 pub trait ShrinkSigned<
     const FITS_I8: bool,
@@ -228,7 +235,7 @@ impl ShrinkSigned<false, false, false, false, true> for () {
 
 // Compile-time Label Mapping ------------------------------------------------------------------------------------------
 
-/// Return a label (`enum` discriminant), corresponding to the smallest type capable of representing input value
+/// Return a label corresponding to the smallest type capable of representing input value
 /// (positive, i.e. maximum, or negative, i.e. minimum).
 ///
 /// # Example

@@ -15,10 +15,13 @@ For signed integers, macro input may be a maximum or a minimum.
 
 ### What is this for?
 
-Aiding the compiler in memory layout optimization (aka ["struct packing"](http://www.catb.org/esr/structure-packing/)).
-For an example usecase where `smallnum` cuts RAM usage by 50%, please see [this part](https://github.com/tnballo/scapegoat#the-high_assurance-feature) of the `scapegoat` crate's documentation.
+* **Saving memory:** aiding the compiler in memory layout optimization (aka ["struct packing"](http://www.catb.org/esr/structure-packing/)).
+    * See zero-cost examples below.
 
-### Doesn't `#[repr(packed)]` already do that?
+* **Improving ergonomics:** creating APIs that abstract away the underlying integer type.
+    * E.g. method params/returns use `usize`, but stored as `u16` internally. Upcast is free. Downcast checks for loss of precision.
+
+### Doesn't `#[repr(packed)]` already save memory?
 
 Not safely. The difference is subtle but important:
 

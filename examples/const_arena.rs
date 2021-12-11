@@ -1,10 +1,13 @@
+// We use nightly Rust ONLY to print our arena to the console for illustrative purposes.
+// In a real program, this example would omit the print and be compatible with stable 1.51+
 #![feature(type_name_of_val)]
 
 use smallnum::{small_unsigned, SmallUnsigned};
 
-// This is a demo/template for a const arena design, does not include actual add/remove operations, etc.
-// The novelty here is that `U` (array of free indexes) is akin to a "dependant type" computed from
-// the value of `N` (size of arena). But that computation is done by the caller at construction time, with
+// This is a [currently non-functional] PoC for a const arena design.
+// Does not include actual add/remove operations, etc.
+// The novelty here is that `[U; N]` (array of free indexes) is akin to a compile-time-only "dependant type" computed
+// from the value of `N` (size of arena). But that computation is done by the caller at construction time, with
 // the `small_unsigned` macro.
 pub struct Arena<T, U, const N: usize> {
     pub storage: [Option<T>; N],
